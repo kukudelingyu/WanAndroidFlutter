@@ -1,6 +1,10 @@
 
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
-import 'package:wananzhuo_flutter/entity_article_dart.dart';
+import 'package:flutter/material.dart';
+
+import 'entity_article_dart.dart';
 
 class ArticleItem extends StatefulWidget {
 
@@ -20,7 +24,7 @@ class ArticleItemState extends State<ArticleItem> {
   Widget build(BuildContext context) {
     return Container(
       height: 30,
-      child: Text(datas!.desc!),
+      child: Text(datas!.title!, style: TextStyle(color: Colors.red),),
     );
   }
 

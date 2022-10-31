@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:wananzhuo_flutter/entity_article_dart.dart';
 import 'package:wananzhuo_flutter/entity_banner_list.dart';
 import 'package:banner_view/banner_view.dart';
+import 'package:wananzhuo_flutter/http/api.dart';
+import 'package:wananzhuo_flutter/http/dio_utils.dart';
 
 import 'artical_item.dart';
 
@@ -19,9 +21,9 @@ class _ArticlePageState extends State<ArticlePage> {
 
   var isLoading = false;
 
-  List<Datas> articles = [];
+  var articles = [];
 
-  List<BannerData> banners = [];
+  var banners = [];
 
   var listTotalSize = 0;
 
@@ -68,7 +70,7 @@ class _ArticlePageState extends State<ArticlePage> {
 
   Future<void> _pullToRefresh() async {
     isLoading = true;
-    Iterable<Future> futures = [_getArticleList(), _getBanners()];
+    Iterable<Future> futures = [_getArticleList(),_getBanners()];
     await Future.wait(futures);
     isLoading = false;
     setState(() {});
@@ -76,17 +78,18 @@ class _ArticlePageState extends State<ArticlePage> {
   }
 
   _getArticleList([bool updateUi = false]) async {
-    var dio = Dio();
-    Response<EntityArticleDart> response = await dio.get<EntityArticleDart>("https://www.wanandroid.com/article/list/1/json");
-    if (response.statusCode == 200) {
-      EntityArticleDart? entity = response.data;
-      listTotalSize = entity?.data?.total == null ? 0 : (entity!.data!.total as int);
+    var response = await HttpUtils.instance.get(Api.articleList);
+    if (response.success) {
+      EntityArticleDart dart = EntityArticleDart.fromJson(response.data);
+      listTotalSize = dart.total! as int;
       if(curPage == 0) {
         articles.clear();
       }
-      if(entity?.data?.datas != null) {
+      print("数据获取成功----------------------------------------------------------------map=${response.data}");
+      if(dart.datas != null) {
         curPage++;
-        articles = entity!.data!.datas!;
+        articles = dart.datas!;
+        print("数据设置成功----------------------------------------------------------------");
       }
       if(updateUi) {
         setState(() {});
@@ -95,16 +98,17 @@ class _ArticlePageState extends State<ArticlePage> {
   }
 
   _getBanners() async {
-    var dio = Dio();
-    Response<EntityBannerList> response = await dio.get<EntityBannerList>("https://www.wanandroid.com/banner/json");
-    if(response.statusCode == 200 && response.data?.data != null) {
-      EntityBannerList? entity = response.data;
-      banners = entity!.data!;
+    var response = await HttpUtils.instance.get(Api.bannerList);
+    if(response.success) {
+      banners = response.data!;
     }
   }
 
   Widget? _bannerView() {
-    var list = banners.map((e) => Image.network(e.url == null ? "" : e.url!, fit: BoxFit.cover)).toList();
+    var list = banners.map((e) {
+      return Image.network(e["imagePath"] ?? "", fit: BoxFit.cover);
+    }).toList();
+    print("e.type-------------------------${list}");
     return list.isEmpty ? null : BannerView(
       list,
       intervalDuration: const Duration(seconds: 3),
