@@ -1,13 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:wananzhuo_flutter/entity_article_dart.dart';
-import 'package:wananzhuo_flutter/entity_banner_list.dart';
+import 'package:wananzhuo_flutter/artical/article_detail_page.dart';
+import 'package:wananzhuo_flutter/entity/entity_article_dart.dart';
+import 'package:wananzhuo_flutter/entity/entity_banner_list.dart';
 import 'package:banner_view/banner_view.dart';
 import 'package:wananzhuo_flutter/http/api.dart';
 import 'package:wananzhuo_flutter/http/dio_utils.dart';
+import 'package:wananzhuo_flutter/webview/WebViewExample.dart';
 
 import 'artical_item.dart';
 
+/// 首页-文章
 class ArticlePage extends StatefulWidget {
   const ArticlePage({super.key});
 
@@ -85,11 +88,9 @@ class _ArticlePageState extends State<ArticlePage> {
       if(curPage == 0) {
         articles.clear();
       }
-      print("数据获取成功----------------------------------------------------------------map=${response.data}");
       if(dart.datas != null) {
         curPage++;
         articles = dart.datas!;
-        print("数据设置成功----------------------------------------------------------------");
       }
       if(updateUi) {
         setState(() {});
@@ -106,7 +107,13 @@ class _ArticlePageState extends State<ArticlePage> {
 
   Widget? _bannerView() {
     var list = banners.map((e) {
-      return Image.network(e["imagePath"] ?? "", fit: BoxFit.cover);
+      return InkWell(
+        child: Image.network(e["imagePath"] ?? "", fit: BoxFit.cover),
+        onTap: () {
+          Navigator.push(context,MaterialPageRoute(builder:
+              (BuildContext context)=> WebViewExample()));
+        },
+      );
     }).toList();
     print("e.type-------------------------${list}");
     return list.isEmpty ? null : BannerView(
